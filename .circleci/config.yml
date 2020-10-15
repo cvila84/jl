@@ -9,25 +9,27 @@ jobs:
     working_directory: ~/jl
     steps:
       - checkout
-      - run: mkdir -p out
+      - run: mkdir -p workspace/out
       - run: go get -v -t -d ./...
       - run: go test -v ./...
-      - run: GOOS=windows GOARCH=amd64 go build -o out/jl.exe cmd/jl/main.go
-      - run: GOOS=linux GOARCH=amd64 go build -o out/jl cmd/jl/main.go
-      - run: echo "export CIRCLE_TAG=$(git tag -l --points-at HEAD)" >> $BASH_ENV
+      - run: GOOS=windows GOARCH=amd64 go build -o workspace/out/jl.exe cmd/jl/main.go
+      - run: GOOS=linux GOARCH=amd64 go build -o workspace/out/jl cmd/jl/main.go
+      - run: echo "export CIRCLE_TAG=$(git tag -l --points-at HEAD)" >> workspace/circle_tag
       - persist_to_workspace:
-          root: out
+          root: workspace
           paths:
-            - jl.exe
-            - jl
+            - circle_tag
+            - out/jl.exe
+            - out/jl
   publish:
     docker:
       - image: cibuilds/github:0.10
     steps:
       - attach_workspace:
-          at: ./artifacts
-      - run: echo ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./artifacts/
-      - run: ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./artifacts/
+          at: ./workspace
+      - run: echo "export CIRCLE_TAG=$(echo ./workspace/circle_tag)" >> $BASH_ENV
+      - run: echo ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./workspace/out
+      - run: ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./workspace/out
 workflows:
   version: 2
   main:
