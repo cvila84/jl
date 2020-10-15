@@ -14,6 +14,7 @@ jobs:
       - run: go test -v ./...
       - run: GOOS=windows GOARCH=amd64 go build -o out/jl.exe cmd/jl/main.go
       - run: GOOS=linux GOARCH=amd64 go build -o out/jl cmd/jl/main.go
+      - run: echo "export CIRCLE_TAG=$(git tag -l --points-at HEAD)" >> $BASH_ENV
       - persist_to_workspace:
           root: out
           paths:
@@ -25,10 +26,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ./artifacts
-      - run: CIRCLE_TAG=$(git tag -l --points-at HEAD)
       - run: echo ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./artifacts/
-      - run: ls -lR
-#      - run: ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./artifacts/
+      - run: ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./artifacts/
 workflows:
   version: 2
   main:
