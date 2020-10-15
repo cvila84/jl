@@ -37,9 +37,19 @@ jobs:
           fi
 workflows:
   version: 2
-  main:
+  build-branch:
     jobs:
       - build
+  build-tag:
+    jobs:
+      - build:
+          filters: &filters-build-tag
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
       - publish:
           requires:
             - build
+          filters:
+            <<: *filters-build-tag
