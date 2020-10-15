@@ -27,7 +27,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ./workspace
-      - run: echo "export CIRCLE_TAG=$(echo ./workspace/circle_tag)" >> $BASH_ENV
+      - run: echo "export CIRCLE_TAG=$(cat ./workspace/circle_tag)" >> $BASH_ENV
       - run: echo ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./workspace/out
       - run: ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./workspace/out
 workflows:
