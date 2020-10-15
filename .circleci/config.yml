@@ -30,13 +30,14 @@ jobs:
       - run: |
           CIRCLE_TAG=$(cat ./workspace/circle_tag)
           if [[ "$CIRCLE_TAG" != "" ]]; then
+            echo Create release with ${CIRCLE_TAG} tag
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./workspace/out
           else
             echo No tag, no release !
           fi
 workflows:
   version: 2
-  tag:
+  main:
     jobs:
       - build
       - publish:
