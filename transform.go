@@ -36,6 +36,60 @@ var (
 	LowerCase = TransformFunc(strings.ToLower)
 )
 
+// Compress compresses a dot tokenized string in reducing left side token(s) to one letter so that it fits within the
+// requested length. (See http://logback.qos.ch/manual/layouts.html#conversionWord)
+type Compress int
+
+func (c Compress) Transform(ctx *Context, input string) string {
+	if ctx.DisableTruncate {
+		return input
+	}
+	compressedSize := utf8.RuneCountInString(input)
+	if compressedSize <= int(c) {
+		return input
+	}
+	compressedPartsIndex := 0
+	parts := strings.Split(input, ".")
+	nCompressableParts := len(parts) - 1
+	var outputBuffer strings.Builder
+	if nCompressableParts > 0 {
+		var compressedParts []string
+		for _, part := range parts[:nCompressableParts] {
+			compressedPartsIndex++
+			compressedParts = append(compressedParts, string(part[0]))
+			compressedSize -= len(part) - 1
+			if compressedSize <= int(c) {
+				break
+			}
+			compressedSize--
+		}
+		for _, part := range compressedParts {
+			outputBuffer.WriteString(part)
+		}
+		outputBuffer.WriteRune('.')
+		if compressedPartsIndex < nCompressableParts {
+			for _, part := range parts[compressedPartsIndex:nCompressableParts] {
+				outputBuffer.WriteString(part)
+			}
+			outputBuffer.WriteRune('.')
+		}
+	}
+	lastPart := parts[nCompressableParts]
+	if int(c)-outputBuffer.Len()-len(lastPart) >= 0 {
+		outputBuffer.WriteString(lastPart)
+	} else if int(c)-outputBuffer.Len() >= 0 {
+		outputBuffer.WriteString(lastPart[:int(c)-outputBuffer.Len()])
+	} else {
+		outputBuffer.Reset()
+		if len(lastPart) > int(c) {
+			outputBuffer.WriteString(lastPart[:c])
+		} else {
+			outputBuffer.WriteString(lastPart)
+		}
+	}
+	return outputBuffer.String()
+}
+
 // Truncate truncates the string to the a requested number of digits.
 type Truncate int
 
@@ -63,7 +117,7 @@ func (remain Ellipsize) Transform(ctx *Context, input string) string {
 	}
 	remain -= 1 // account for the ellipsis
 	chomped := length - int(remain)
-	start := int(remain)/2
+	start := int(remain) / 2
 	end := start + chomped
 	return input[:start] + "…" + input[end:]
 }

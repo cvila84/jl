@@ -26,7 +26,7 @@ If [filename] is omitted, it reads from standard input.
 `, os.Args[0], os.Args[0])
 		flag.PrintDefaults()
 	}
-	formatFlag := flag.String("format", "compact", `Formatter for logs. The options are "compact" and "logfmt"`)
+	formatFlag := flag.String("format", "ulf", `Formatter for logs. The options are "compact", "logfmt" or "ulf"`)
 	color := flag.String("color", "auto", `Sets the color mode. The options are "auto", "yes", and "no". "auto" disables color if stdout is not a tty`)
 	truncate := flag.Bool("truncate", true, "Whether to truncate strings in the compact formatter")
 	flag.Parse()
@@ -53,6 +53,11 @@ If [filename] is omitted, it reads from standard input.
 		printer = lp
 	case "compact":
 		cp := jl.NewCompactPrinter(os.Stdout)
+		cp.DisableColor = disableColor
+		cp.DisableTruncate = !*truncate
+		printer = cp
+	case "ulf":
+		cp := jl.NewULFPrinter(os.Stdout)
 		cp.DisableColor = disableColor
 		cp.DisableTruncate = !*truncate
 		printer = cp
