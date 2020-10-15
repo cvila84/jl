@@ -9,6 +9,33 @@ jobs:
     working_directory: ~/jl
     steps:
       - checkout
-      - run: go get -v -t -d ./...
-      - run: go test -v ./...
-      - run: ls -la
+      - run: mkdir -p out
+      - run: GOOS=windows GOARCH=amd64 go get -v -t -d ./...
+      - run: GOOS=windows GOARCH=amd64 go test -v ./...
+      - run: GOOS=windows GOARCH=amd64 go build -o out/jl.exe cmd/jl/main.go
+      - run: GOOS=linux GOARCH=amd64 go get -v -t -d ./...
+      - run: GOOS=linux GOARCH=amd64 go test -v ./...
+      - run: GOOS=linux GOARCH=amd64 go build -o out/jl cmd/jl/main.go
+      - persist_to_workspace:
+          root: out
+          paths:
+            - jl.exe
+            - jl
+  publish:
+    docker:
+      - image: cibuilds/github:0.10
+    steps:
+      - attach_workspace:
+          at: ./artifacts
+      - run: ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./artifacts/
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build
+      - publish:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
