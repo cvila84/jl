@@ -30,9 +30,15 @@ jobs:
       - run: CIRCLE_TAG=$(cat ./workspace/circle_tag) ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./workspace/out
 workflows:
   version: 2
-  main:
+  build:
     jobs:
       - build
+  build-n-deploy:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
       - publish:
           requires:
             - build
