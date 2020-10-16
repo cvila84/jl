@@ -30,10 +30,6 @@ var DefaultULFServicePrinterFieldFmt = []FieldFmt{{
 	Name:    "time",
 	Finders: []FieldFinder{ByNames("timestamp")},
 }, {
-	Name:         "instance",
-	Finders:      []FieldFinder{ByNames("application.instanceId")},
-	Transformers: []Transformer{Ellipsize(18), Format("[%s]"), RightPad(20), ColorSequence(AllColors)},
-}, {
 	Name:         "logger",
 	Finders:      []FieldFinder{ByNames("application.component")},
 	Transformers: []Transformer{Compress(30), Format("%s"), LeftPad(30), ColorSequence(AllColors)},
@@ -55,25 +51,29 @@ var DefaultULFCommunicationPrinterFieldFmt = []FieldFmt{{
 	Name:    "time",
 	Finders: []FieldFinder{ByNames("timestamp")},
 }, {
-	Name:         "instance",
-	Finders:      []FieldFinder{ByNames("application.instanceId")},
-	Transformers: []Transformer{Ellipsize(18), Format("[%s]"), RightPad(20), ColorSequence(AllColors)},
-}, {
 	Name:         "logger",
 	Finders:      []FieldFinder{ByNames("application.component")},
 	Transformers: []Transformer{Compress(30), Format("%s"), LeftPad(30), ColorSequence(AllColors)},
 }, {
-	Name:    "flow",
-	Finders: []FieldFinder{ByNames("details.flow")},
+	Name:         "flow",
+	Finders:      []FieldFinder{ByNames("details.flow")},
+	Transformers: []Transformer{ColorSequence(AllColors)},
 }, {
-	Name:    "method",
-	Finders: []FieldFinder{ByNames("details.request.method")},
+	Name:         "method",
+	Finders:      []FieldFinder{ByNames("details.request.method")},
+	Transformers: []Transformer{ColorSequence(AllColors)},
 }, {
 	Name:    "url",
 	Finders: []FieldFinder{ByNames("details.request.url")},
 }, {
 	Name:    "statusCode",
 	Finders: []FieldFinder{ByNames("details.response.statusCode")},
+}, {
+	Name:    "requestBody",
+	Finders: []FieldFinder{ByNames("details.request.body")},
+}, {
+	Name:    "responseBody",
+	Finders: []FieldFinder{ByNames("details.response.body")},
 }}
 
 // NewCompactPrinter allocates and returns a new compact printer.
