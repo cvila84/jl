@@ -34,7 +34,7 @@ If [filename] is omitted, it reads from standard input.
 	disableColor := false
 	switch *color {
 	case "auto":
-		if !isatty.IsTerminal(os.Stdout.Fd()) {
+		if !isatty.IsTerminal(os.Stdout.Fd()) && !isatty.IsCygwinTerminal(os.Stdout.Fd()) {
 			disableColor = true
 		}
 	case "yes":
